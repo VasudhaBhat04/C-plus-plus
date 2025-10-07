@@ -144,7 +144,7 @@ using namespace std;
 
 class Animal {
 public:
-    void sound() {
+    virtual void sound() {
         cout << "Animal makes sound" << endl;
     }
 };
@@ -162,10 +162,95 @@ int main() {
 }
 /*
 2)Virtual Functions:member function in a base class that you expect to override in derived classes.
+Dynamic in nature.
+Defined by keyword "virtual".
+Inside a base class & are always declared with a base class & overriden  in a child class.
+Called during run-time
+Why Do We Need It?
 
-
-
-
-
+Without virtual, C++ uses early binding — it decides which function to call based on the type of pointer/reference at compile time.
+But in inheritance, we often want to call the derived class’s version of a function even if we use a base class pointer.
+That’s where virtual comes in — it enables late binding (runtime binding).
 
 */
+// Without Virtual (Static Binding)
+#include <iostream>
+using namespace std;
+
+class Base {
+public:
+    void show() {   // Not virtual
+        cout << "Base class show()" << endl;
+    }
+};
+
+class Derived : public Base {
+public:
+    void show() {
+        cout << "Derived class show()" << endl;
+    }
+};
+
+int main() {
+    Base* b;        // Base class pointer
+    Derived d;
+    b = &d;        // The difference only shows up when you have a Parent pointer/reference to Child object.
+    b->show();      //  Calls Base::show() (static binding)
+}
+
+//With Virtual (Dynamic Binding)
+#include <iostream>
+using namespace std;
+
+class Base {
+public:
+    virtual void show() {   // Now it's virtual
+        cout << "Base class show()" << endl;
+    }
+};
+
+class Derived : public Base {
+public:
+    void show() override {  // Overriding
+        cout << "Derived class show()" << endl;
+    }
+};
+
+int main() {
+    Base* b;       
+    Derived d;
+    b = &d;
+
+    b->show();   // Calls Derived::show() (runtime binding)
+}
+
+/*
+When you make a function virtual, C++ secretly creates a V-Table (Virtual Table):
+
+Each class with virtual functions has a table of function pointers.
+Each object has a vptr (virtual pointer) that points to this table.
+At runtime, the correct function (Base or Derived) is called via the vptr.
+
+*/
+//Virtual Destructor
+#include <iostream>
+using namespace std;
+
+class Base {
+public:
+    virtual ~Base() {  // important
+        cout << "Base destructor\n";
+    }
+};
+
+class Derived : public Base {
+public:
+    ~Derived() {
+        cout << "Derived destructor\n";
+    }
+};
+
+int main() {
+    Base* b = new Derived();
+    delete b;  // ✅ Calls both destructors properly
+}
